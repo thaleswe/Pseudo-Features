@@ -2,21 +2,24 @@ const $newPseudo = function (selector) {
   const target =
     selector === "body" ? [document.body] : document.body.querySelectorAll(selector);
 
-    console.log(target)
 
   const utils = {
-    getPropertyData: (properties) => {
+    getPropertyData: (properties, thisTarget) => {
       const allItems = Object.entries(properties);
       let allProperties = [];
 
       allItems.forEach((itemData) => {
         const elementSelector = itemData[0];
         const elementProperties = itemData[1];
-        const thisElement =
+        let thisElement =
           elementSelector === "body"
             ? [document.body]
             : document.body.querySelectorAll(elementSelector);
 
+        if(elementSelector === "this" && thisElement.length === 0){
+          thisElement = [thisTarget];
+        }
+      
         const allElementProperties = Object.entries(elementProperties);
         allElementProperties.push({
           element: thisElement,
@@ -29,8 +32,8 @@ const $newPseudo = function (selector) {
       return allProperties;
     },
 
-    setProperties: (properties) => {
-      const allItems = utils.getPropertyData(properties);
+    setProperties: (properties, thisTarget) => {
+      const allItems = utils.getPropertyData(properties, thisTarget);
 
       allItems.forEach((allData) => {
         const elementData = allData.pop();
@@ -54,8 +57,8 @@ const $newPseudo = function (selector) {
       });
     },
 
-    removeProperties: (properties) => {
-      const allItems = utils.getPropertyData(properties);
+    removeProperties: (properties, thisTarget) => {
+      const allItems = utils.getPropertyData(properties, thisTarget);
 
       allItems.forEach((allData) => {
         const elementData = allData.pop();
@@ -69,7 +72,7 @@ const $newPseudo = function (selector) {
           });
         });   
       });
-    },
+    }
   };
 
   class PseudoClasses {
@@ -89,12 +92,12 @@ const $newPseudo = function (selector) {
 
     interHover(requestedProperties) {
       target.forEach((target) => {
-        target.addEventListener("mouseenter", () => {
-          utils.setProperties(requestedProperties);
+        target.addEventListener("mouseenter", (event) => {
+          utils.setProperties(requestedProperties, event.target);
         });
   
-        target.addEventListener("mouseleave", () => {
-          utils.removeProperties(requestedProperties);
+        target.addEventListener("mouseleave", (event) => {
+          utils.removeProperties(requestedProperties, event.target);
         });
       });     
 
@@ -129,21 +132,16 @@ const $newPseudo = function (selector) {
 
     interFocus(requestedProperties) {
       target.forEach((target) => {
-        target.addEventListener("click", function targetListener() {
-          utils.setProperties(requestedProperties);
+        target.addEventListener("click", function targetListener(firstEvent) {
+          utils.setProperties(requestedProperties, firstEvent.target);
           target.removeEventListener("click", targetListener);
   
-          document.documentElement.addEventListener(
-            "click",
-            function bodyListener(event) {
+          document.documentElement.addEventListener("click", function htmlListener(event) {
               if (event.target !== target) {
-                utils.removeProperties(requestedProperties);
+                utils.removeProperties(requestedProperties, firstEvent.target);
   
                 target.addEventListener("click", targetListener);
-                document.documentElement.removeEventListener(
-                  "click",
-                  bodyListener
-                );
+                document.documentElement.removeEventListener("click",htmlListener);
               }
             }
           );
@@ -169,11 +167,11 @@ const $newPseudo = function (selector) {
 
     interChecked(requestedProperties) {
       target.forEach((target) => {
-        target.addEventListener("change", function targetListener() {
+        target.addEventListener("change", function targetListener(event) {
           if (target.checked === true) {
-            utils.setProperties(requestedProperties);
+            utils.setProperties(requestedProperties, event.target);
           } else {
-            utils.removeProperties(requestedProperties);
+            utils.removeProperties(requestedProperties, event.target);
           }
         });
       });
@@ -184,4 +182,3 @@ const $newPseudo = function (selector) {
 
   return new PseudoClasses();
 };
-
