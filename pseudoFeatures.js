@@ -1,6 +1,8 @@
-const $new_pseudo = function (selector) {
+const $newPseudo = function (selector) {
   const target =
-    selector === "body" ? document.body : document.body.querySelector(selector);
+    selector === "body" ? [document.body] : document.body.querySelectorAll(selector);
+
+    console.log(target)
 
   const utils = {
     getPropertyData: (properties) => {
@@ -68,103 +70,114 @@ const $new_pseudo = function (selector) {
 
   class PseudoClasses {
     hoverControl(hoverIn, hoverOut) {
-      target.addEventListener("mouseenter", () => {
-        hoverIn(target);
+      target.forEach((target) => {
+        target.addEventListener("mouseenter", () => {
+          hoverIn(target);
+        });
+  
+        target.addEventListener("mouseleave", () => {
+          hoverOut(target);
+        });
       });
-
-      target.addEventListener("mouseleave", () => {
-        hoverOut(target);
-      });
-
+      
       return this;
     }
 
     interHover(requestedProperties) {
-      target.addEventListener("mouseenter", () => {
-        utils.setProperties(requestedProperties);
-      });
-
-      target.addEventListener("mouseleave", () => {
-        utils.removeProperties(requestedProperties);
-      });
+      target.forEach((target) => {
+        target.addEventListener("mouseenter", () => {
+          utils.setProperties(requestedProperties);
+        });
+  
+        target.addEventListener("mouseleave", () => {
+          utils.removeProperties(requestedProperties);
+        });
+      });     
 
       return this;
     }
 
     focusControl(focusIn, focusOut) {
-      target.addEventListener("click", function targetListener() {
-        focusIn(target);
-        target.removeEventListener("click", targetListener);
-
-        document.documentElement.addEventListener(
-          "click",
-          function htmlListener(event) {
-            if (event.target !== target) {
-              focusOut(target);
-
-              target.addEventListener("click", targetListener);
-              document.documentElement.removeEventListener(
-                "click",
-                htmlListener
-              );
+      target.forEach((target) => {
+        target.addEventListener("click", function targetListener() {
+          focusIn(target);
+          target.removeEventListener("click", targetListener);
+  
+          document.documentElement.addEventListener(
+            "click",
+            function htmlListener(event) {
+              if (event.target !== target) {
+                focusOut(target);
+  
+                target.addEventListener("click", targetListener);
+                document.documentElement.removeEventListener(
+                  "click",
+                  htmlListener
+                );
+              }
             }
-          }
-        );
+          );
+        });
       });
-
+      
       return this;
     }
 
     interFocus(requestedProperties) {
-      target.addEventListener("click", function targetListener() {
-        utils.setProperties(requestedProperties);
-        target.removeEventListener("click", targetListener);
-
-        document.documentElement.addEventListener(
-          "click",
-          function bodyListener(event) {
-            if (event.target !== target) {
-              utils.removeProperties(requestedProperties);
-
-              target.addEventListener("click", targetListener);
-              document.documentElement.removeEventListener(
-                "click",
-                bodyListener
-              );
+      target.forEach((target) => {
+        target.addEventListener("click", function targetListener() {
+          utils.setProperties(requestedProperties);
+          target.removeEventListener("click", targetListener);
+  
+          document.documentElement.addEventListener(
+            "click",
+            function bodyListener(event) {
+              if (event.target !== target) {
+                utils.removeProperties(requestedProperties);
+  
+                target.addEventListener("click", targetListener);
+                document.documentElement.removeEventListener(
+                  "click",
+                  bodyListener
+                );
+              }
             }
-          }
-        );
+          );
+        });
       });
 
       return this;
     }
 
     checkedControl(checkedIn, checkedOut) {
-      target.addEventListener("change", function targetListener() {
-        if (target.checked === true) {
-          checkedIn(target);
-        } else {
-          checkedOut(target);
-        }
+      target.forEach((target) => {
+        target.addEventListener("change", function targetListener() {
+          if (target.checked === true) {
+            checkedIn(target);
+          } else {
+            checkedOut(target);
+          }
+        });
       });
-
+      
       return this;
     }
 
     interChecked(requestedProperties) {
-      target.addEventListener("change", function targetListener() {
-        if (target.checked === true) {
-          utils.setProperties(requestedProperties);
-        } else {
-          utils.removeProperties(requestedProperties);
-        }
+      target.forEach((target) => {
+        target.addEventListener("change", function targetListener() {
+          if (target.checked === true) {
+            utils.setProperties(requestedProperties);
+          } else {
+            utils.removeProperties(requestedProperties);
+          }
+        });
       });
-
+      
       return this;
     }
   }
 
   return new PseudoClasses();
 };
-
 
