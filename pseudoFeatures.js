@@ -14,8 +14,8 @@ const $newPseudo = function (selector) {
         const elementProperties = itemData[1];
         const thisElement =
           elementSelector === "body"
-            ? document.body
-            : document.body.querySelector(elementSelector);
+            ? [document.body]
+            : document.body.querySelectorAll(elementSelector);
 
         const allElementProperties = Object.entries(elementProperties);
         allElementProperties.push({
@@ -36,18 +36,20 @@ const $newPseudo = function (selector) {
         const elementData = allData.pop();
         const thisElement = elementData.element;
 
-        allData.forEach((properties_data) => {
-          const property_name = properties_data[0];
-          const property_value = properties_data[1];
-          const old_value = window.getComputedStyle(thisElement)[property_name];
-
-          // trick to make the transition work
-
-          thisElement.style[property_name] = old_value;
-
-          setTimeout(() => {
-            thisElement.style[property_name] = property_value;
-          }, 0);
+        thisElement.forEach((thisElement) => {
+          allData.forEach((properties_data) => {
+            const property_name = properties_data[0];
+            const property_value = properties_data[1];
+            const old_value = window.getComputedStyle(thisElement)[property_name];
+  
+            // trick to make the transition work
+  
+            thisElement.style[property_name] = old_value;
+  
+            setTimeout(() => {
+              thisElement.style[property_name] = property_value;
+            }, 0);
+          });
         });
       });
     },
@@ -59,11 +61,13 @@ const $newPseudo = function (selector) {
         const elementData = allData.pop();
         const thisElement = elementData.element;
 
-        allData.forEach((properties_data) => {
-          const property_name = properties_data[0];
-
-          thisElement.style.removeProperty(property_name);
-        });
+        thisElement.forEach((thisElement) => {
+          allData.forEach((properties_data) => {
+            const property_name = properties_data[0];
+  
+            thisElement.style.removeProperty(property_name);
+          });
+        });   
       });
     },
   };
