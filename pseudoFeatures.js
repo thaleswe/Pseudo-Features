@@ -1,7 +1,8 @@
 const $newPseudo = function (selector) {
   const target =
-    selector === "body" ? [document.body] : document.body.querySelectorAll(selector);
-
+    selector === "body"
+      ? [document.body]
+      : document.body.querySelectorAll(selector);
 
   const utils = {
     getPropertyData: (properties, thisTarget) => {
@@ -16,10 +17,10 @@ const $newPseudo = function (selector) {
             ? [document.body]
             : document.body.querySelectorAll(elementSelector);
 
-        if(elementSelector === "this" && thisElement.length === 0){
+        if (elementSelector === "this" && thisElement.length === 0) {
           thisElement = [thisTarget];
         }
-      
+
         const allElementProperties = Object.entries(elementProperties);
         allElementProperties.push({
           element: thisElement,
@@ -43,12 +44,13 @@ const $newPseudo = function (selector) {
           allData.forEach((properties_data) => {
             const property_name = properties_data[0];
             const property_value = properties_data[1];
-            const old_value = window.getComputedStyle(thisElement)[property_name];
-  
+            const old_value =
+              window.getComputedStyle(thisElement)[property_name];
+
             // trick to make the transition work
-  
+
             thisElement.style[property_name] = old_value;
-  
+
             setTimeout(() => {
               thisElement.style[property_name] = property_value;
             }, 0);
@@ -67,12 +69,24 @@ const $newPseudo = function (selector) {
         thisElement.forEach((thisElement) => {
           allData.forEach((properties_data) => {
             const property_name = properties_data[0];
-  
+
             thisElement.style.removeProperty(property_name);
           });
-        });   
+        });
       });
-    }
+    },
+
+    singleTarget: (elementReference, requestedProperties) => {
+      const allProperties = Object.entries(requestedProperties);
+      elementReference.forEach((elementReference) => {
+        allProperties.forEach((properties) => {
+          const property_name = properties[0];
+          const property_value = properties[1];
+
+          elementReference.style[property_name] = property_value;
+        });
+      });
+    },
   };
 
   class PseudoClasses {
@@ -81,12 +95,12 @@ const $newPseudo = function (selector) {
         target.addEventListener("mouseenter", () => {
           hoverIn(target);
         });
-  
+
         target.addEventListener("mouseleave", () => {
           hoverOut(target);
         });
       });
-      
+
       return this;
     }
 
@@ -95,11 +109,11 @@ const $newPseudo = function (selector) {
         target.addEventListener("mouseenter", (event) => {
           utils.setProperties(requestedProperties, event.target);
         });
-  
+
         target.addEventListener("mouseleave", (event) => {
           utils.removeProperties(requestedProperties, event.target);
         });
-      });     
+      });
 
       return this;
     }
@@ -109,13 +123,13 @@ const $newPseudo = function (selector) {
         target.addEventListener("click", function targetListener() {
           focusIn(target);
           target.removeEventListener("click", targetListener);
-  
+
           document.documentElement.addEventListener(
             "click",
             function htmlListener(event) {
               if (event.target !== target) {
                 focusOut(target);
-  
+
                 target.addEventListener("click", targetListener);
                 document.documentElement.removeEventListener(
                   "click",
@@ -126,7 +140,7 @@ const $newPseudo = function (selector) {
           );
         });
       });
-      
+
       return this;
     }
 
@@ -135,13 +149,18 @@ const $newPseudo = function (selector) {
         target.addEventListener("click", function targetListener(firstEvent) {
           utils.setProperties(requestedProperties, firstEvent.target);
           target.removeEventListener("click", targetListener);
-  
-          document.documentElement.addEventListener("click", function htmlListener(event) {
+
+          document.documentElement.addEventListener(
+            "click",
+            function htmlListener(event) {
               if (event.target !== target) {
                 utils.removeProperties(requestedProperties, firstEvent.target);
-  
+
                 target.addEventListener("click", targetListener);
-                document.documentElement.removeEventListener("click",htmlListener);
+                document.documentElement.removeEventListener(
+                  "click",
+                  htmlListener
+                );
               }
             }
           );
@@ -161,7 +180,7 @@ const $newPseudo = function (selector) {
           }
         });
       });
-      
+
       return this;
     }
 
@@ -175,7 +194,103 @@ const $newPseudo = function (selector) {
           }
         });
       });
-      
+
+      return this;
+    }
+
+    nthChild(sequence, requestedProperties) {
+      const elementReference = document.body.querySelectorAll(
+        `${selector}:nth-child(${sequence})`
+      );
+
+      utils.singleTarget(elementReference, requestedProperties);
+
+      return this;
+    }
+
+    nthLastChild(sequence, requestedProperties) {
+      const elementReference = document.body.querySelectorAll(
+        `${selector}:nth-last-child(${sequence})`
+      );
+
+      utils.singleTarget(elementReference, requestedProperties);
+
+      return this;
+    }
+
+    nthOfType(reference, sequence, requestedProperties) {
+      const elementReference = reference === "this"
+      ? document.body.querySelectorAll(
+        `${selector}:nth-of-type(${sequence})`
+      )
+      : document.body.querySelectorAll(
+        `${selector} ${reference}:nth-of-type(${sequence})`
+      );
+
+      utils.singleTarget(elementReference, requestedProperties);
+
+      return this;
+    }
+
+    nthLastOfType(reference, sequence, requestedProperties) {
+      const elementReference = reference === "this"
+      ? document.body.querySelectorAll(
+        `${selector}:nth-last-of-type(${sequence})`
+      )
+      : document.body.querySelectorAll(
+        `${selector} ${reference}:nth-last-of-type(${sequence})`
+      );
+
+      utils.singleTarget(elementReference, requestedProperties);
+
+      return this;
+    }
+
+    firstChild(requestedProperties) {
+      const elementReference = document.body.querySelectorAll(
+        `${selector}:first-child`
+      );
+
+      utils.singleTarget(elementReference, requestedProperties);
+
+      return this;
+    }
+
+    firstOfType(reference, requestedProperties) {
+      const elementReference = reference === "this"
+      ? document.body.querySelectorAll(
+        `${selector}:first-of-type`
+      )
+      : document.body.querySelectorAll(
+        `${selector} ${reference}:first-of-type`
+      );
+
+      utils.singleTarget(elementReference, requestedProperties);
+
+      return this;
+    }
+
+    lastChild(requestedProperties) {
+      const elementReference = document.body.querySelectorAll(
+        `${selector}:last-child`
+      );
+
+      utils.singleTarget(elementReference, requestedProperties);
+
+      return this;
+    }
+
+    lastOfType(reference, requestedProperties) {
+      const elementReference = reference === "this"
+      ? document.body.querySelectorAll(
+        `${selector}:last-of-type`
+      )
+      : document.body.querySelectorAll(
+        `${selector} ${reference}:last-of-type`
+      );
+
+      utils.singleTarget(elementReference, requestedProperties);
+
       return this;
     }
   }
