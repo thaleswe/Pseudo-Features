@@ -1,3 +1,3 @@
-<img align="right" alt="Thales-pic" src="https://media.discordapp.net/attachments/809216883571687484/934138533537542164/pseudo-features01.gif?width=1080&height=257">
+<img align="right" alt="Thales-pic" src="https://media.discordapp.net/attachments/928682395346022420/934153769237753896/vai_ou_n.gif?width=1080&height=272">
 
 Coming soon :)
